@@ -4,6 +4,8 @@ public delegate string WriteLogDelegate(string logMessage);
 
 public class TypeTests
 {
+    int count = 0;
+
     [Fact]
     public void GetBooksReturnDifferentObjects()
     {
@@ -81,7 +83,23 @@ public class TypeTests
         Assert.Equal("Hello!", result);
     }
 
+    [Fact]
+    public void WriteLogDelegateCanPointToMultipleMethods() {
+        WriteLogDelegate log = ReturnMessage;
+        log += ReturnMessage;
+        log += IncrementCount;
+
+        var result = log("Hello!");
+        Assert.Equal(3, count);
+    }
+
+    string IncrementCount(string message) {
+        count++;
+        return message;
+    }
+
     string ReturnMessage(string message) {
+        count++;
         return message;
     }
 

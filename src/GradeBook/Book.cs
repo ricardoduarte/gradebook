@@ -1,8 +1,12 @@
 namespace GradeBook {
+
+    public delegate void GradeAddedDelegate(object sender, EventArgs args);
+
     public class Book {
         private List<double> grades;
         public string Name { get; set; }
         const string CATEGORY = "Science";
+        public event GradeAddedDelegate GradeAdded;
 
         public Book(string name) {
             this.Name = name;
@@ -12,6 +16,9 @@ namespace GradeBook {
         public void AddGrade(double grade) {
             if (grade <= 100 && grade >= 0) {
                 this.grades.Add(grade);
+                if (this.GradeAdded != null) {
+                    GradeAdded(this, new EventArgs());
+                }
             }
             else {
                 throw new ArgumentException("Invalid grade");

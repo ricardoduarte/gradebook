@@ -2,6 +2,7 @@
     class Program {
         static void Main(string[] args) {
             var book = new Book("Ricardo's GradeBook");
+            book.GradeAdded += OnGradeAdded;
             
             while (true) {
                 Console.WriteLine("Please enter a grade or 'q' to quit");
@@ -25,6 +26,10 @@
             Console.WriteLine($"The lowest grade is {stats.Low}");
             Console.WriteLine($"The average grade is {stats.Average:N1}");
             Console.WriteLine($"The letter grade is {stats.Letter}");
+        }
+
+        static void OnGradeAdded(object sender, EventArgs args) {
+            Console.WriteLine("A grade was added");
         }
     }
 }
