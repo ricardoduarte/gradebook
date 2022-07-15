@@ -50,7 +50,7 @@ public class TypeTests
     [Fact]
     public void CSharpCanPassByRef()
     {
-        var book1 = GetBook("Book 1");
+        IBook book1 = GetBook("Book 1");
         GetBookSetName(ref book1, "New Name");
 
         Assert.Equal("New Name", book1.Name);
@@ -107,16 +107,16 @@ public class TypeTests
         return parameter.ToUpper();
     }
 
-    Book GetBook(string name) {
-        return new Book(name);
+    IBook GetBook(string name) {
+        return new InMemoryBook(name);
     }
 
-    private void SetName(Book book, string name) {
+    private void SetName(IBook book, string name) {
         book.Name = name;
     }
 
-    private void GetBookSetName(ref Book book, string name) {
-        book = new Book(name);
+    private void GetBookSetName(ref IBook book, string name) {
+        book = new InMemoryBook(name);
     }
 
     private int GetInt() {

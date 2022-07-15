@@ -2,18 +2,40 @@ namespace GradeBook {
 
     public delegate void GradeAddedDelegate(object sender, EventArgs args);
 
-    public class Book {
-        private List<double> grades;
+    public class NamedObject {
         public string Name { get; set; }
-        const string CATEGORY = "Science";
-        public event GradeAddedDelegate GradeAdded;
 
-        public Book(string name) {
-            this.Name = name;
+        public NamedObject(string name) {
+            Name = name;
+        }
+    }
+
+    public interface IBook {
+        void AddGrade(double grade);
+        Statistics GetStatistics();
+        string Name { get; set; }
+        event GradeAddedDelegate GradeAdded;
+    }
+
+    public abstract class Book : NamedObject, IBook {
+
+        public Book(string name) : base(name) {}
+
+        public abstract event GradeAddedDelegate GradeAdded;
+        public abstract void AddGrade(double grade);
+        public abstract Statistics GetStatistics();
+    }
+
+    public class InMemoryBook : Book {
+        private List<double> grades;
+        const string CATEGORY = "Science";
+        public override event GradeAddedDelegate GradeAdded;
+
+        public InMemoryBook(string name) : base(name) {
             this.grades = new List<double>();
         }
 
-        public void AddGrade(double grade) {
+        public override void AddGrade(double grade) {
             if (grade <= 100 && grade >= 0) {
                 this.grades.Add(grade);
                 if (this.GradeAdded != null) {
@@ -42,39 +64,48 @@ namespace GradeBook {
             }
         }
 
-        public Statistics GetStatistics() {
+        public override Statistics GetStatistics() {
             var result = new Statistics();
-            var sum = 0.0;
-            result.High = double.MinValue;
-            result.Low = double.MaxValue;
+            
             foreach(double number in this.grades) {
-                sum += number;
-                result.High = Math.Max(number, result.High);
-                result.Low = Math.Min(number, result.Low);
+                result.Add(number);
             }
-            result.Average = sum / grades.Count;
 
-            switch(result.Average) {
-                case var d when d >= 90.0:
-                    result.Letter = 'A';
-                    break;
+            return result;
+        }
+    }
 
-                case var d when d >= 80.0:
-                    result.Letter = 'B';
-                    break;
+    public class DiskBook : Book
+    {
+        public DiskBook(string name) : base(name)
+        {
+        }
 
-                case var d when d >= 70.0:
-                    result.Letter = 'C';
-                    break;
+        public override event GradeAddedDelegate GradeAdded;
 
-                case var d when d >= 60.0:
-                    result.Letter = 'D';
-                    break;
-
-                default:
-                    result.Letter = 'F';
-                    break;
+        public override void AddGrade(double grade)
+        {
+            using(var writer = File.AppendText($"{Name}.txt")) {
+                writer.WriteLine(grade);
+                if (this.GradeAdded != null) {
+                    GradeAdded(this, new EventArgs());
+                }
             }
+        }
+
+        public override Statistics GetStatistics()
+        {
+            var result = new Statistics();
+
+            using(var reader = File.OpenText($"{Name}.txt")) {
+                var line = reader.ReadLine();
+                while (line != null) {
+                    var number = double.Parse(line);
+                    result.Add(number);
+                    line = reader.ReadLine();
+                }
+            }
+
             return result;
         }
     }

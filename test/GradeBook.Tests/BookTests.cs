@@ -6,7 +6,7 @@ public class BookTests
     public void BookCalculatesAnAverageGrade()
     {
         // Arrange
-        var book = new Book("");
+        IBook book = new InMemoryBook("");
         
         book.AddGrade(89.1);
         book.AddGrade(90.5);
